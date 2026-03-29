@@ -1,13 +1,27 @@
 import express from 'express'
+import path from 'path'
 import { ENV } from './lib/env.js';
 
 const app = express()
-console.log(ENV.PORT)
-console.log(ENV.DB_URL)
+const port = ENV.PORT || 8000;
+const __dirname = path.resolve()
 
-app.get("/health",(req,res)=>{
-    res.status(200).json({msg:"api is up and running"});
+app.get("/health", (req, res) => {
+    res.status(200).json({ msg: "api is up and running" });
 });
-app.listen(ENV.PORT, ()=>{
-    console.log("Server is running on port :",ENV.PORT)
+app.get("/books", (req, res) => {
+    res.status(200).json({ msg: "this is the books endpoint" })
+})
+
+// make our app ready for deployment
+if (ENV.NODE_ENV) {
+    app.use(express.static(path.join(__dirname, "../frontend/dist")))
+
+    app.get("/{*any}", (req, res) => {
+        res.sendFile(path.json(__dirname, "../frontend", "dist", "index.html"))
+    })
+}
+
+app.listen(port, () => {
+    console.log("Server is running on port :", port)
 })
